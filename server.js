@@ -81,7 +81,7 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://praashibysupal.com', 'https://www.praashibysupal.com']
+    ? ['https://praashibysupal.com', 'https://www.praashibysupal.com','https://praashibackend-1.onrender.com']
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -98,7 +98,7 @@ app.use('/uploads', (req, res, next) => {
     : 'http://localhost:3000');
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  res.setHeader("Content-Security-Policy", "img-src 'self' https://api.praashibysupal.com http://localhost:5000 data:");
+  res.setHeader("Content-Security-Policy", "img-src 'self' https://praashibackend-1.onrender.com https://api.praashibysupal.com http://localhost:5000 data:");
   next();
 });
 
