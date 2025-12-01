@@ -105,10 +105,16 @@ app.use('/uploads', (req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection using Sequelize
-const { sequelize, testConnection } = require('./config/sequelize');
+const { sequelize } = require('./config/sequelize');
 
 // Test database connection
-testConnection();
+sequelize.authenticate()
+  .then(() => {
+    console.log('✅ Database connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('❌ Unable to connect to the database:', err);
+  });
 
 app.use(optionalAuth)
 
