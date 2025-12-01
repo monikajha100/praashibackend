@@ -60,7 +60,6 @@ const promotionalOffersRoutes = require('./routes/promotional-offers');
 const cashbackRoutes = require('./routes/cashback');
 const visitorRoutes = require('./routes/visitors');
 
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
 const app = express();
 
 // Security middleware - disabled for development
