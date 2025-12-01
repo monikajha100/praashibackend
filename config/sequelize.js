@@ -1,27 +1,10 @@
 const { Sequelize } = require('sequelize');
-const fs = require('fs');
-const path = require('path');
-const dotenv = require('dotenv');
-
-const envPaths = [
-  path.join(__dirname, '..', 'env.local'),
-  path.join(__dirname, '..', '.env.local'),
-  path.join(__dirname, '..', '.env'),
-  path.join(__dirname, '..', '.env.prod'),
-  path.join(__dirname, '..', '.env.production')
-];
-for (const p of envPaths) {
-  if (fs.existsSync(p)) {
-    dotenv.config({ path: p });
-    break;
-  }
-}
 
 // Database configuration
 const config = {
   development: {
     username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || process.env.DB_PASS || '',
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'praashibysupal_db',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3306,
@@ -36,7 +19,7 @@ const config = {
   },
   production: {
     username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD || process.env.DB_PASS,
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
