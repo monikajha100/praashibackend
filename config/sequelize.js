@@ -1,81 +1,28 @@
-const { Sequelize } = require('sequelize');
+let sequelize;
 
-// Database configuration
-const config = {
-  development: {
-    username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'praashibysupal_db',
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
+if (process.env.DATABASE_URL) {
+  // Production environment on Render
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'mysql',
-    logging: console.log, // Enable SQL logging in development
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
-  },
-  production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: 'mysql',
-    logging: false, // Disable SQL logging in production
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false
+        rejectUnauthorized: false // Required for Render connections
       }
+    },
+    logging: false
+  });
+} else {
+  // Local development environment
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASS,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT || 3306,
+      dialect: 'mysql',
+      logging: false
     }
-  }
-};
-
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
-
-// Create Sequelize instance
-const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
-  {
-    host: dbConfig.host,
-    port: dbConfig.port,
-    dialect: dbConfig.dialect,
-    logging: dbConfig.logging,
-    pool: dbConfig.pool,
-    dialectOptions: dbConfig.dialectOptions,
-    define: {
-      timestamps: true,
-      underscored: false,
-      freezeTableName: true
-    }
-  }
-);
-
-// Test database connection
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Sequelize database connection established successfully');
-  } catch (error) {
-    console.error('❌ Unable to connect to the database:', error);
-    process.exit(1);
-  }
-};
-
-module.exports = {
-  sequelize,
-  testConnection,
-  config
-};
+  );
+}

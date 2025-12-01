@@ -17,16 +17,38 @@ for (const p of envPaths) {
   }
 }
 
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || process.env.DB_PASS || '',
-  database: process.env.DB_NAME || 'praashiby_supal',
-  port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-};
+let dbConfig;
+
+if (process.env.DATABASE_URL) {
+  // Production environment on Render
+  const dbUrl = new URL(process.env.DATABASE_URL);
+  dbConfig = {
+    host: dbUrl.hostname,
+    user: dbUrl.username,
+    password: dbUrl.password,
+    database: dbUrl.pathname.slice(1),
+    port: dbUrl.port,
+    ssl: {
+      require: true,
+      rejectUnauthorized: false // Required for Render connections
+    },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+} else {
+  // Local development environment
+  dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'praashiby_supal',
+    port: process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+}
 
 const pool = mysql.createPool(dbConfig);
 
