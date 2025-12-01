@@ -5,19 +5,16 @@ const db = require('../config/database');
 // Get all categories (public - only active)
 router.get('/', async (req, res) => {
   try {
-    // const categories = await db.query(`
-    //   SELECT 
-    //     c.*,
-    //     COUNT(p.id) as product_count
-    //   FROM categories c
-    //   LEFT JOIN products p ON c.id = p.category_id AND p.is_active = 1
-    //   WHERE c.is_active = 1
-    //   GROUP BY c.id
-    //   ORDER BY c.sort_order, c.name
-    // `);
-        const categories = await db.query(`
-      select * from categories
-      `);
+    const categories = await db.query(`
+      SELECT 
+        c.*,
+        COUNT(p.id) as product_count
+      FROM categories c
+      LEFT JOIN products p ON c.id = p.category_id AND p.is_active = 1
+      WHERE c.is_active = 1
+      GROUP BY c.id
+      ORDER BY c.sort_order, c.name
+    `);
 
     res.json(categories);
   } catch (error) {
