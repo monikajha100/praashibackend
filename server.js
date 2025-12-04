@@ -106,7 +106,7 @@ app.use('/uploads', (req, res, next) => {
     : 'http://localhost:3000');
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  res.setHeader("Content-Security-Policy", "img-src 'self' https://praashibackend-1.onrender.com https://api.praashibysupal.com http://localhost:3000 data:");
+  res.setHeader("Content-Security-Policy", "img-src 'self' https://prashifrontend.onrender.com https://api.praashibysupal.com http://localhost:5000 data:");
   next();
 });
 
