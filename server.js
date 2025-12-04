@@ -135,7 +135,7 @@ app.use('/api/subcategories', subcategoryRoutes);
 app.use('/api/admin/subcategories', subcategoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/admin/banners', bannerRoutes);
