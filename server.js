@@ -102,7 +102,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use('/uploads', (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", process.env.NODE_ENV === 'production' 
-    ? 'hhttps://prashifrontend.onrender.com' 
+    ? 'https://prashifrontend.onrender.com' 
     : 'http://localhost:3000');
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
