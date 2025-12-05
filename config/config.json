@@ -1,0 +1,32 @@
+{
+  "development": {
+    "username": "root",
+    "password": "1234",
+    "database": "mysql-2083de4f-primeacedemy.g.aivencloud.com",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "port": 3306
+  },
+  "test": {
+    "username": "root",
+    "password": "1234",
+    "database": "praashiby_supal",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "port": 3306
+  },
+  "production": {
+    "username": "avnadmin",
+    "password": "AAVNS_dRa6DDzvTFDZuGPn92m",
+    "database": "defaultdb",
+    "host": "mysql-2083de4f-primeacedemy.g.aivencloud.com",
+    "dialect": "mysql",
+    "port": 12996,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}
