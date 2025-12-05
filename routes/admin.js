@@ -64,8 +64,8 @@ router.get('/dashboard', devBypass, devBypassAdmin, async (req, res) => {
     ] = await Promise.all([
       db.query('SELECT COUNT(*) as count FROM products WHERE is_active = 1'),
       db.query('SELECT COUNT(*) as count FROM orders'),
-      db.query('SELECT COUNT(*) as count FROM users WHERE role = "user"'),
-      db.query('SELECT SUM(total_amount) as total FROM orders WHERE payment_status = "paid"'),
+      db.query('SELECT COUNT(*) as count FROM users '),
+      db.query('SELECT SUM(total_amount) as total FROM orders'),
       db.query(`
         SELECT o.*, u.name as customer_name
         FROM orders o
