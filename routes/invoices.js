@@ -20,120 +20,100 @@ const transporter = nodemailer.createTransport({
 router.get('/', devBypassAdmin, async (req, res) => {
   try {
     console.log('=== GET ALL INVOICES (ADMIN) ===');
-
-    const page = parseInt(req.query.page || 1, 10);
-    const limit = parseInt(req.query.limit || 20, 10);
+    console.log('Query params:', req.query);
+    
+    const { page = 1, limit = 20, status, search } = req.query;
     const offset = (page - 1) * limit;
-    const { status, search } = req.query;
 
-    let whereSQL = "WHERE 1=1";
+    let whereClause = 'WHERE 1=1';
     let params = [];
 
-    // Filter - Payment Status
     if (status) {
-      whereSQL += " AND i.payment_status = ?";
+      whereClause += ' AND i.payment_status = ?';
       params.push(status);
     }
 
-    // Search filter
     if (search) {
-      whereSQL += `
-        AND (
-          i.invoice_number LIKE ? OR 
-          o.order_number LIKE ? OR
-          u.name LIKE ? OR u.email LIKE ? OR
-          o.customer_name LIKE ? OR o.customer_email LIKE ?
-        )
-      `;
-      const term = `%${search}%`;
-      params.push(term, term, term, term, term, term);
+      whereClause += ' AND (i.invoice_number LIKE ? OR o.order_number LIKE ? OR u.name LIKE ? OR u.email LIKE ? OR o.customer_name LIKE ? OR o.customer_email LIKE ?)';
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
     }
 
-    console.log("WHERE SQL =", whereSQL);
-    console.log("PARAMS =", params);
-    
-    // ---------- COUNT QUERY ----------------
-    const countSQL = `
-      SELECT COUNT(DISTINCT i.id) AS total
+    console.log('WHERE clause:', whereClause);
+    console.log('Query params:', params);
+    console.log('Pagination - page:', page, 'limit:', limit, 'offset:', offset);
+
+    // Get total count for pagination
+    const countQuery = `
+      SELECT COUNT(DISTINCT i.id) as total
       FROM invoices i
       LEFT JOIN orders o ON i.order_id = o.id
       LEFT JOIN users u ON i.customer_id = u.id
-      ${whereSQL}
+      ${whereClause}
     `;
+    const countResult = await db.query(countQuery, params);
+    const totalInvoices = (countResult && countResult[0] && countResult[0].total) || 0;
 
-    const [countRows] = await db.query(countSQL, params);
-    const total = countRows?.total || 0;
-    
-    console.log("Total invoices =", total);
-
-    // ---------- MAIN QUERY ----------------
-    let invoiceSQL = `
-      SELECT 
-        * 
-      FROM invoices ;
-      
-    `;
-
-    let invoiceParams = [...params ];
-    let invoices = [];
-
+    // Try to get invoices with item count, but handle if invoice_items table doesn't exist
+    let invoices;
     try {
-      [invoices] = await db.query(invoiceSQL, invoiceParams);
-    } catch (err) {
-
-      // If invoice_items does not exist
-      if (
-        err.message.includes("invoice_items") ||
-        err.message.includes("doesn't exist") ||
-        err.message.includes("Unknown")
-      ) {
-        console.log("⚠ invoice_items table missing. Querying without item count.");
-
-        invoiceSQL = `
+      invoices = await db.query(`
+        SELECT 
+          i.*,
+          o.order_number,
+          COALESCE(u.name, o.customer_name) as customer_name,
+          COALESCE(u.email, o.customer_email) as customer_email,
+          COUNT(ii.id) as item_count
+        FROM invoices i
+        LEFT JOIN orders o ON i.order_id = o.id
+        LEFT JOIN users u ON i.customer_id = u.id
+        LEFT JOIN invoice_items ii ON i.id = ii.invoice_id
+        ${whereClause}
+        GROUP BY i.id
+        ORDER BY i.created_at DESC
+       
+      `, [...params]);
+    } catch (error) {
+      // If invoice_items table doesn't exist, query without it
+      if (error.message && (error.message.includes('invoice_items') || error.message.includes("doesn't exist") || error.message.includes('Unknown table'))) {
+        console.log('⚠️ invoice_items table not found, querying without item count');
+        invoices = await db.query(`
           SELECT 
             i.*,
             o.order_number,
-            COALESCE(u.name, o.customer_name) AS customer_name,
-            COALESCE(u.email, o.customer_email) AS customer_email,
-            0 AS item_count
+            COALESCE(u.name, o.customer_name) as customer_name,
+            COALESCE(u.email, o.customer_email) as customer_email,
+            0 as item_count
           FROM invoices i
           LEFT JOIN orders o ON i.order_id = o.id
           LEFT JOIN users u ON i.customer_id = u.id
-          ${whereSQL}
+          ${whereClause}
           ORDER BY i.created_at DESC
-         
-        `;
-
-        [invoices] = await db.query(invoiceSQL, invoiceParams);
+          LIMIT ? OFFSET ?
+        `, [...params, parseInt(limit, 10), parseInt(offset, 10)]);
       } else {
-        throw err;
+        throw error;
       }
     }
 
-    console.log(`✔ Found ${invoices.length} invoices (Page ${page})`);
+    console.log('✅ Found', invoices.length, 'invoices out of', totalInvoices, 'total');
+    console.log('First invoice sample:', invoices[0] ? {
+      id: invoices[0].id,
+      invoice_number: invoices[0].invoice_number,
+      customer_name: invoices[0].customer_name,
+      customer_email: invoices[0].customer_email,
+      total_amount: invoices[0].total_amount,
+      payment_status: invoices[0].payment_status
+    } : 'No invoices found');
 
-    res.json({
-      success: true,
-      total,
-      page,
-      limit,
-      invoices
-    });
-
+    res.json(invoices);
   } catch (error) {
-    console.error("\n=== GET ALL INVOICES ERROR ===");
-    console.error(error);
-    res.status(500).json({ success: false, message: "Error fetching invoices", error: error.message });
+    console.error('=== GET ALL INVOICES ERROR ===');
+    console.error('Error fetching invoices:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Error fetching invoices', error: error.message });
   }
 });
-
-
-
-
-
-
-
-
 
 // Get customer invoices
 router.get('/my-invoices', authenticateToken, async (req, res) => {

@@ -71,12 +71,12 @@ router.post('/', [
   body('text_color').optional().trim(),
   body('sort_order').optional().isInt().withMessage('Sort order must be a number'),
   body('display_duration').optional().isInt().withMessage('Display duration must be a number'),
-  // body('device_type').optional().isIn(['desktop', 'mobile', 'both']).withMessage('Device type must be desktop, mobile, or both'),
+  body('device_type').optional().isIn(['desktop', 'mobile', 'both']).withMessage('Device type must be desktop, mobile, or both'),
   body('mobile_text').optional().trim(),
-  // body('mobile_background_color').optional().trim(),
-  // body('mobile_text_color').optional().trim(),
+  body('mobile_background_color').optional().trim(),
+  body('mobile_text_color').optional().trim(),
   body('image_url').optional().trim(),
-  // body('mobile_image_url').optional().trim(),
+  body('mobile_image_url').optional().trim(),
   body('link_url').optional().trim(),
   body('button_text').optional().trim()
 ], async (req, res) => {
