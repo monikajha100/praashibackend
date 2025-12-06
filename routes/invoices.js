@@ -15,10 +15,14 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // yourgmail@gmail.com
-    pass: process.env.EMAIL_PASS  // 16-digit App Password
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  connectionTimeout: 30000, // 30 sec
+  greetingTimeout: 30000,
+  socketTimeout: 30000
 });
+
 
 
 // Get all invoices (admin only)
