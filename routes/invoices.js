@@ -12,16 +12,36 @@ const fs = require('fs');
 // Email configuration
 const nodemailer = require("nodemailer");
 
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   },
+//   connectionTimeout: 30000, // 30 sec
+//   greetingTimeout: 30000,
+//   socketTimeout: 30000
+// });
+
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false, // ✅ MUST be false for 587
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS,
   },
-  connectionTimeout: 30000, // 30 sec
-  greetingTimeout: 30000,
-  socketTimeout: 30000
+  connectionTimeout: 30000,
+  socketTimeout: 30000,
 });
+
+
+
+
+
+
+
 
 
 
@@ -565,6 +585,7 @@ router.post('/:invoiceId/send-email', devBypassAdmin, async (req, res) => {
     // Send email
     const mailOptions = {
       from: settings.company_email,
+      // from: process.env.EMAIL_FROM,
       to: invoice.customer_email,
       subject: `Invoice ${invoice.invoice_number} - ${settings.company_name}`,
       html: emailHtml
