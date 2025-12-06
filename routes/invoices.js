@@ -1,20 +1,25 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const db = require('../config/database');
 const { authenticateToken, devBypass, devBypassAdmin } = require('../middleware/auth');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
-
+//xsmtpsib-c572fbad3e03d1100383aa15f97ec30a3b1cb6d087c3d8cf2c28cf73a1adf6b1-fopKvEt4V6R8zYcb
 // Email configuration
+const nodemailer = require("nodemailer");
+
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER || 'your-email@gmail.com',
-    pass: process.env.EMAIL_PASS || 'your-app-password'
+    user: process.env.EMAIL_USER, // yourgmail@gmail.com
+    pass: process.env.EMAIL_PASS  // 16-digit App Password
   }
 });
+
 
 // Get all invoices (admin only)
 router.get('/', devBypassAdmin, async (req, res) => {
